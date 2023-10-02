@@ -1,74 +1,116 @@
+import json
 import os
+from datetime import datetime
 
+# Путь к файлу с заметками
+NOTES_FILE = "notes.json"
 
-# Функция для создания новой заметки
-def create_note():
-    note_title = input("Введите заголовок заметки: ")
-    note_content = input("Введите текст заметки: ")
+# Проверка существования файла с заметками
+if not os.path.exists(NOTES_FILE):
+    with open(NOTES_FILE, "w") as f:
+        json.dump([], f)
 
-    with open(f"{note_title}.txt", "w") as note_file:
-        note_file.write(note_content)
-    print(f"Заметка '{note_title}' создана успешно.")
+# Функция для добавления заметки
+def add_note():
+    title = input("Введите заголовок заметки: ")
+    message = input("Введите текст заметки: ")
 
+    with open(NOTES_FILE, "r") as f:
+        notes = json.load(f)
 
-# Функция для чтения списка всех заметок
-def list_notes():
-    notes = [file.split(".txt")[0] for file in os.listdir() if file.endswith(".txt")]
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    new_note = {"id": len(notes) + 1, "title": title, "message": message, "timestamp": timestamp}
 
-    if not notes:
-        print("Список заметок пуст.")
+    notes.append(new_note)
+
+    with open(NOTES_FILE, "w") as f:
+        json.dump(notes, f, indent=4)
+
+    print("Заметка успешно добавлена.")
+
+# Функция для вывода списка заметок
+def list_notes(date_filter=None):
+    with open(NOTES_FILE, "r") as f:
+        notes = json.load(f)
+
+    if date_filter:
+        filtered_notes = [note for note in notes if note["timestamp"].startswith(date_filter)]
+        if not filtered_notes:
+            print("Заметок с выбранной датой не найдено.")
+        else:
+            print("Заметки с выбранной датой:")
+            for note in filtered_notes:
+                print(f"{note['id']}. {note['title']} ({note['timestamp']})")
     else:
-        print("Список заметок:")
-        for note in notes:
-            print(f"- {note}")
+        if not notes:
+            print("Список заметок пуст.")
+        else:
+            print("Список заметок:")
+            for note in notes:
+                print(f"{note['id']}. {note['title']} ({note['timestamp']})")
 
 
-# Функция для чтения заметки по её заголовку
+# Функция для чтения заметки по ID
 def read_note():
-    note_title = input("Введите заголовок заметки для чтения: ")
+    note_id = int(input("Введите ID заметки для чтения: "))
 
-    try:
-        with open(f"{note_title}.txt", "r") as note_file:
-            note_content = note_file.read()
-        print(f"Заметка '{note_title}':\n{note_content}")
-    except FileNotFoundError:
-        print(f"Заметка с заголовком '{note_title}' не найдена.")
+    with open(NOTES_FILE, "r") as f:
+        notes = json.load(f)
+
+    for note in notes:
+        if note["id"] == note_id:
+            print(f"Заметка {note['id']} ({note['timestamp']}):\n{note['title']}\n{note['message']}")
+            return
+
+    print(f"Заметка с ID {note_id} не найдена.")
 
 
-# Функция для редактирования существующей заметки
+# Функция для редактирования заметки по ID
 def edit_note():
-    note_title = input("Введите заголовок заметки для редактирования: ")
+    note_id = int(input("Введите ID заметки для редактирования: "))
 
-    try:
-        with open(f"{note_title}.txt", "r") as note_file:
-            note_content = note_file.read()
+    with open(NOTES_FILE, "r") as f:
+        notes = json.load(f)
 
-        print(f"Заметка '{note_title}':\n{note_content}")
+    for note in notes:
+        if note["id"] == note_id:
+            title = input("Введите новый заголовок: ")
+            message = input("Введите новый текст: ")
+            note["title"] = title
+            note["message"] = message
+            note["timestamp"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-        new_content = input("Введите новый текст заметки: ")
+            with open(NOTES_FILE, "w") as f:
+                json.dump(notes, f, indent=4)
 
-        with open(f"{note_title}.txt", "w") as note_file:
-            note_file.write(new_content)
-        print(f"Заметка '{note_title}' успешно отредактирована.")
-    except FileNotFoundError:
-        print(f"Заметка с заголовком '{note_title}' не найдена.")
+            print(f"Заметка {note['id']} успешно отредактирована.")
+            return
+
+    print(f"Заметка с ID {note_id} не найдена.")
 
 
-# Функция для удаления заметки
+# Функция для удаления заметки по ID
 def delete_note():
-    note_title = input("Введите заголовок заметки для удаления: ")
+    note_id = int(input("Введите ID заметки для удаления: "))
 
-    try:
-        os.remove(f"{note_title}.txt")
-        print(f"Заметка '{note_title}' успешно удалена.")
-    except FileNotFoundError:
-        print(f"Заметка с заголовком '{note_title}' не найдена.")
+    with open(NOTES_FILE, "r") as f:
+        notes = json.load(f)
+
+    for note in notes:
+        if note["id"] == note_id:
+            notes.remove(note)
+            with open(NOTES_FILE, "w") as f:
+                json.dump(notes, f, indent=4)
+            print(f"Заметка {note_id} успешно удалена.")
+            return
+
+    print(f"Заметка с ID {note_id} не найдена.")
 
 
 # Основной цикл программы
 while True:
     print("\nВыберите действие:")
-    print("1. Создать заметку")
+    print("1. Добавить заметку")
     print("2. Список заметок")
     print("3. Читать заметку")
     print("4. Редактировать заметку")
@@ -78,9 +120,11 @@ while True:
     choice = input("Введите номер действия: ")
 
     if choice == "1":
-        create_note()
+        add_note()
     elif choice == "2":
-        list_notes()
+        date_filter = input(
+            "Введите дату (год-месяц-день) для фильтрации (или нажмите Enter для вывода всех заметок): ")
+        list_notes(date_filter)
     elif choice == "3":
         read_note()
     elif choice == "4":
