@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Записная книжка</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Записная книжка</h1>
+
+    <h2>Добавить заметку</h2>
+    <form action="/add" method="post" id="addForm">
+        <label for="title">Заголовок:</label>
+        <input type="text" id="title" name="title" required>
+
+        <label for="message">Текст заметки:</label>
+        <textarea id="message" name="message" required></textarea>
+
+        <input type="submit" value="Добавить заметку" class="btn">
+    </form>
+
+    <h2>Список заметок</h2>
+    <form action="/list" method="get" id="listForm">
+        <label for="date">Фильтр по дате (год-месяц-день):</label>
+        <input type="text" id="date" name="date">
+        <input type="submit" value="Фильтровать" class="btn">
+    </form>
+    <ul id="notesList">
+        <!-- Здесь будет выводиться список заметок -->
+    </ul>
+
+    <h2>Читать заметку</h2>
+    <form action="/read" method="get" id="readForm">
+        <label for="note_id">ID заметки:</label>
+        <input type="number" id="note_id" name="note_id" required>
+        <input type="submit" value="Читать заметку" class="btn">
+    </form>
+
+    <h2>Редактировать заметку</h2>
+    <form action="/edit" method="post" id="editForm">
+        <label for="edit_note_id">ID заметки:</label>
+        <input type="number" id="edit_note_id" name="edit_note_id" required>
+
+        <label for="edit_title">Новый заголовок:</label>
+        <input type="text" id="edit_title" name="edit_title" required>
+
+        <label for="edit_message">Новый текст:</label>
+        <textarea id="edit_message" name="edit_message" required></textarea>
+
+        <input type="submit" value="Редактировать заметку" class="btn">
+    </form>
+
+    <h2>Удалить заметку</h2>
+    <form action="/delete" method="post" id="deleteForm">
+        <label for="delete_note_id">ID заметки:</label>
+        <input type="number" id="delete_note_id" name="delete_note_id" required>
+        <input type="submit" value="Удалить заметку" class="btn">
+    </form>
+
+    <script src="script.js"></script>
+</body>
+</html>
